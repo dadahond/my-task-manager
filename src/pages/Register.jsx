@@ -1,17 +1,45 @@
-import { Link } from "react-router-dom";
+import { Link, useActionData, Form } from "react-router-dom";
 import FormInput from "../components/FormInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // toast
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRegister } from "../hooks/useRegister";
+
+// action
+export const action = async ({ request }) => {
+  const form = await request.formData();
+  const displayName = form.get("name");
+  const email = form.get("email");
+  const password = form.get("password");
+  return { displayName, email, password };
+};
+
 function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatpassword, setRepeatPassword] = useState("");
+  // hook
+  const { registerWithEmailAndPassword } = useRegister();
+  // action data
+  const data = useActionData();
+  useEffect(() => {
+    if (data) {
+      registerWithEmailAndPassword(data.displayName, data.email, data.password);
+    }
+  }, [data]);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    repeatpassword: "",
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
+    const { name, email, password, repeatpassword } = formData;
+
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
@@ -45,10 +73,12 @@ function Register() {
     // Success case
     toast.success("Registration successful!");
   };
+
   return (
     <div className="h-screen grid place-items-center w-full font-semibold">
-      <form
-        onSubmit={handleSubmit}
+      <Form
+        method="post"
+        // onSubmit={handleSubmit}
         className="max-w-80 md:max-w-96 mx-auto w-full"
       >
         <h2 className="text-2xl md:text-3xl text-center font-bold mb-5">
@@ -58,29 +88,33 @@ function Register() {
           type="text"
           placeholder="Name"
           label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
         />
         <FormInput
           type="email"
           placeholder="Email"
           label="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
         />
         <FormInput
           type="password"
           placeholder="Password"
           label="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
         />
         <FormInput
           type="password"
           placeholder="Repeat password"
           label="Repeat password"
-          value={repeatpassword}
-          onChange={(e) => setRepeatPassword(e.target.value)}
+          name="repeatpassword"
+          value={formData.repeatpassword}
+          onChange={handleChange}
         />
         <div className="mt-5">
           <button className="btn btn-neutral btn-block text-lg md:text-xl btn-sm md:btn-md">
@@ -95,10 +129,9 @@ function Register() {
             </Link>
           </p>
         </div>
-      </form>
+      </Form>
       <ToastContainer />
     </div>
   );
 }
-
 export default Register;

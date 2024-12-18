@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCh1Y-aaLCsqgK8AIVm6uYXxUGM1WrRdko",
@@ -12,3 +12,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// auth
+export const auth = getAuth();

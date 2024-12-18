@@ -1,12 +1,30 @@
-import { Link } from "react-router-dom";
+import { Form, Link, useActionData } from "react-router-dom";
 import FormInput from "../components/FormInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // toast
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLogin } from "../hooks/useLogin";
+
+// action
+export const action = async ({ request }) => {
+  const form = await request.formData();
+  const email = form.get("email");
+  const password = form.get("password");
+  return { email, password };
+};
 
 function Login() {
+  // hook
+  const { loginWithEmailAndPassword } = useLogin();
+  // action data
+  const data = useActionData();
+  useEffect(() => {
+    if (data) {
+      loginWithEmailAndPassword(data.email, data.password);
+    }
+  }, [data]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const handleSubmit = (e) => {
@@ -16,11 +34,15 @@ function Login() {
       toast.warning("At least one field is not filled!");
       return;
     }
+    // Success case
+    toast.success("Login successful!");
   };
+
   return (
     <div className="h-screen grid place-items-center w-full font-semibold">
-      <form
-        onSubmit={handleSubmit}
+      <Form
+        method="post"
+        // onSubmit={handleSubmit}
         className="max-w-80 md:max-w-96 mx-auto w-full"
       >
         <h2 className="text-2xl md:text-3xl text-center font-bold mb-5">
@@ -30,6 +52,7 @@ function Login() {
           type="email"
           placeholder="Email"
           label="Email"
+          name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -37,6 +60,7 @@ function Login() {
           type="password"
           placeholder="Password"
           label="Password"
+          name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -57,7 +81,7 @@ function Login() {
             </Link>
           </p>
         </div>
-      </form>
+      </Form>
       <ToastContainer />
     </div>
   );
